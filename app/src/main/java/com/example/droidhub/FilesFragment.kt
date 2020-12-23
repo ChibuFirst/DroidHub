@@ -5,15 +5,18 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
+import com.example.droidhub.databinding.FragmentFilesBinding
 
-class FilesFragment : Fragment() {
+class FilesFragment : Fragment(R.layout.fragment_files) {
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_files, container, false)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val binding = FragmentFilesBinding.bind(view)
+
+        binding.fabAdd.setOnClickListener {
+            findNavController().navigate(R.id.action_filesFragment_to_uploadFragment)
+        }
     }
 
 }
