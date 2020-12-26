@@ -1,4 +1,4 @@
-package com.example.droidhub
+package com.example.droidhub.screens
 
 import android.os.Bundle
 import android.view.View
@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.droidhub.R
 import com.example.droidhub.adapter.FileRecyclerAdapter
 import com.example.droidhub.databinding.FragmentFilesBinding
 import com.example.droidhub.model.File
