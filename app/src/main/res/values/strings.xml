@@ -14,4 +14,7 @@
     <string name="file_name_goes_here">File name goes here</string>
     <string name="choose_file">Choose file</string>
     <string name="upload_file">Upload file</string>
+    <string name="field_required">Field required.</string>
+    <string name="invalid_email">Invalid Email.</string>
+    <string name="password_length_error">Password should be at least 6 characters.</string>
 </resources>
