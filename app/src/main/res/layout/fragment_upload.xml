@@ -31,9 +31,10 @@
         app:layout_constraintTop_toBottomOf="@id/text_view">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_file_name"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:inputType="textPersonName" />
+            android:inputType="text" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
