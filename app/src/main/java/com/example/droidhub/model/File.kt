@@ -1,3 +1,3 @@
 package com.example.droidhub.model
 
-data class File(val fileName: String, val fileUri: String)
+data class File(var fileName: String = "", var fileUri: String = "")
