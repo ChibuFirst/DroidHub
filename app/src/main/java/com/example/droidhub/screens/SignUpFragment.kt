@@ -1,4 +1,4 @@
-package com.example.droidhub
+package com.example.droidhub.screens
 
 import android.os.Bundle
 import android.util.Log
@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.droidhub.R
 import com.example.droidhub.databinding.FragmentSignUpBinding
 import com.example.droidhub.util.InputsValidation
 import com.google.firebase.auth.FirebaseAuth

@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/signUpFragment"
-        android:name="com.example.droidhub.SignUpFragment"
+        android:name="com.example.droidhub.screens.SignUpFragment"
         android:label="fragment_sign_up"
         tools:layout="@layout/fragment_sign_up">
         <action
@@ -21,7 +21,7 @@
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.droidhub.LoginFragment"
+        android:name="com.example.droidhub.screens.LoginFragment"
         android:label="fragment_login"
         tools:layout="@layout/fragment_login" >
         <action
@@ -35,7 +35,7 @@
     </fragment>
     <fragment
         android:id="@+id/filesFragment"
-        android:name="com.example.droidhub.FilesFragment"
+        android:name="com.example.droidhub.screens.FilesFragment"
         android:label="fragment_files"
         tools:layout="@layout/fragment_files" >
         <action
@@ -48,7 +48,7 @@
     </fragment>
     <fragment
         android:id="@+id/uploadFragment"
-        android:name="com.example.droidhub.UploadFragment"
+        android:name="com.example.droidhub.screens.UploadFragment"
         android:label="fragment_upload"
         tools:layout="@layout/fragment_upload" >
         <action
