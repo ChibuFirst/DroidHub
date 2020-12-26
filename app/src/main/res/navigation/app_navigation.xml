@@ -46,5 +46,14 @@
         android:id="@+id/uploadFragment"
         android:name="com.example.droidhub.UploadFragment"
         android:label="fragment_upload"
-        tools:layout="@layout/fragment_upload" />
+        tools:layout="@layout/fragment_upload" >
+        <action
+            android:id="@+id/action_uploadFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/nav_graph" />
+        <action
+            android:id="@+id/action_uploadFragment_to_filesFragment"
+            app:destination="@id/filesFragment"
+            app:popUpTo="@id/nav_graph" />
+    </fragment>
 </navigation>
