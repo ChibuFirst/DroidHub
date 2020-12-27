@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -18,7 +19,9 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import java.util.*
+import com.google.firebase.storage.ktx.component1
+import com.google.firebase.storage.ktx.component2
+import kotlin.math.roundToInt
 
 class UploadFragment : Fragment(R.layout.fragment_upload) {
 
@@ -72,12 +75,13 @@ class UploadFragment : Fragment(R.layout.fragment_upload) {
             binding.progressBar.visibility = View.VISIBLE
             binding.buttonUpload.isEnabled = false
 
-            val ref = storageReference.child("files/" + UUID.randomUUID().toString())
-            ref.putFile(filePath!!).continueWithTask { task ->
+            val ref = storageReference.child("files/${System.currentTimeMillis()}.${getFileExtension(filePath!!)}")
+            val uploadTask = ref.putFile(filePath!!)
+            val urlTask = uploadTask.continueWithTask { task ->
                 if (!task.isSuccessful) {
                     Log.w(TAG, "uploadFile: failed", task.exception)
                     Toast.makeText(requireContext(), "Unable to upload file.", Toast.LENGTH_LONG)
-                        .show()
+                            .show()
                 }
                 ref.downloadUrl
             }.addOnCompleteListener { task ->
@@ -86,27 +90,27 @@ class UploadFragment : Fragment(R.layout.fragment_upload) {
                     val downloadUri = task.result
                     val file = File(binding.editFileName.text.toString(), downloadUri.toString())
                     databaseReference.child("files").child(auth.currentUser!!.uid).push()
-                        .setValue(file)
-                        .addOnCompleteListener { t ->
-                            if (t.isSuccessful) {
-                                Log.d(TAG, "addToDatabase: success")
-                                findNavController().navigate(R.id.action_uploadFragment_to_filesFragment)
-                                Toast.makeText(
-                                    requireContext(),
-                                    "File upload successful.",
-                                    Toast.LENGTH_LONG
-                                )
-                                    .show()
-                            } else {
-                                Log.w(TAG, "addToDatabase: failed", t.exception)
-                                Toast.makeText(
-                                    requireContext(),
-                                    "Not saved to database",
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
+                            .setValue(file)
+                            .addOnCompleteListener { t ->
+                                if (t.isSuccessful) {
+                                    Log.d(TAG, "addToDatabase: success")
+                                    findNavController().navigate(R.id.action_uploadFragment_to_filesFragment)
+                                    Toast.makeText(
+                                            requireContext(),
+                                            "File upload successful.",
+                                            Toast.LENGTH_LONG
+                                    )
+                                            .show()
+                                } else {
+                                    Log.w(TAG, "addToDatabase: failed", t.exception)
+                                    Toast.makeText(
+                                            requireContext(),
+                                            "Not saved to database",
+                                            Toast.LENGTH_SHORT
+                                    )
+                                            .show()
+                                }
                             }
-                        }
 
                     binding.progressBar.visibility = View.INVISIBLE
                     binding.buttonChoose.isEnabled = true
@@ -114,16 +118,31 @@ class UploadFragment : Fragment(R.layout.fragment_upload) {
                 } else {
                     Log.w(TAG, "uploadFile: failed", task.exception)
                     Toast.makeText(requireContext(), "File upload failed.", Toast.LENGTH_LONG)
-                        .show()
+                            .show()
+                    binding.textProgress.visibility = View.INVISIBLE
                     binding.progressBar.visibility = View.INVISIBLE
                     binding.buttonChoose.isEnabled = true
                     binding.buttonUpload.isEnabled = true
                 }
             }
+            uploadTask.addOnProgressListener { (bytesTransferred, totalByteCount) ->
+                binding.textProgress.visibility = View.VISIBLE
+                val progress = (100.0 * bytesTransferred) / totalByteCount
+                val progressStatus = "${progress.roundToInt()}%"
+                Log.d(TAG, "Upload is $progressStatus done")
+                binding.textProgress.text = progressStatus
+            }
+
         } else {
             binding.buttonChoose.isEnabled = true
             Toast.makeText(requireContext(), "Select file to upload.", Toast.LENGTH_LONG).show()
         }
+    }
+
+    private fun getFileExtension(uri: Uri): String {
+        val resolver = requireContext().contentResolver
+        val mime = MimeTypeMap.getSingleton()
+        return mime.getExtensionFromMimeType(resolver.getType(uri))!!
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
