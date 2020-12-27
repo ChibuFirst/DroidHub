@@ -32,14 +32,14 @@ class FilesFragment : Fragment(R.layout.fragment_files) {
         binding = FragmentFilesBinding.bind(view)
         auth = FirebaseAuth.getInstance()
         databaseReference =
-            FirebaseDatabase.getInstance().getReference("files").child(auth.currentUser!!.uid)
+                FirebaseDatabase.getInstance().getReference("files").child(auth.currentUser!!.uid)
 
         binding.imageSignOut.setOnClickListener {
             auth.signOut()
             Toast.makeText(
-                requireContext(),
-                "You've been signed out successfully.",
-                Toast.LENGTH_LONG
+                    requireContext(),
+                    "You've been signed out successfully.",
+                    Toast.LENGTH_LONG
             ).show()
             findNavController().navigate(R.id.action_filesFragment_to_loginFragment)
         }
@@ -71,6 +71,7 @@ class FilesFragment : Fragment(R.layout.fragment_files) {
                 } else {
                     binding.progressBar.visibility = View.GONE
                     binding.textInfo.visibility = View.VISIBLE
+                    binding.recyclerView.visibility = View.GONE
                 }
             }
 
