@@ -8,6 +8,7 @@
     android:layout_margin="10dp"
     android:clickable="true"
     android:focusable="true"
+    android:checkable="true"
     app:cardElevation="3dp">
 
     <LinearLayout

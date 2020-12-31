@@ -77,7 +77,7 @@ class UploadFragment : Fragment(R.layout.fragment_upload) {
 
             val ref = storageReference.child("files/${System.currentTimeMillis()}.${getFileExtension(filePath!!)}")
             val uploadTask = ref.putFile(filePath!!)
-            val urlTask = uploadTask.continueWithTask { task ->
+            uploadTask.continueWithTask { task ->
                 if (!task.isSuccessful) {
                     Log.w(TAG, "uploadFile: failed", task.exception)
                     Toast.makeText(requireContext(), "Unable to upload file.", Toast.LENGTH_LONG)

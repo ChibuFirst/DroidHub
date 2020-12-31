@@ -19,6 +19,7 @@ class FilesFragment : Fragment(R.layout.fragment_files) {
     private lateinit var auth: FirebaseAuth
     private lateinit var databaseReference: DatabaseReference
     private lateinit var fileList: ArrayList<File>
+    private lateinit var fileKeys: ArrayList<String>
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -50,6 +51,7 @@ class FilesFragment : Fragment(R.layout.fragment_files) {
         }
 
         fileList = ArrayList()
+        fileKeys = ArrayList()
         databaseReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 fileList.clear()
@@ -57,6 +59,7 @@ class FilesFragment : Fragment(R.layout.fragment_files) {
                     for (f in snapshot.children) {
                         val file = f.getValue(File::class.java)
                         fileList.add(file!!)
+                        fileKeys.add(f.key!!)
                     }
                     if (fileList.size < 1) {
                         binding.recyclerView.visibility = View.GONE
@@ -64,7 +67,7 @@ class FilesFragment : Fragment(R.layout.fragment_files) {
                     } else {
                         binding.recyclerView.visibility = View.VISIBLE
                         binding.textInfo.visibility = View.GONE
-                        val adapter = FileRecyclerAdapter(fileList)
+                        val adapter = FileRecyclerAdapter(requireActivity(), fileList, fileKeys)
                         binding.recyclerView.adapter = adapter
                     }
                     binding.progressBar.visibility = View.GONE
