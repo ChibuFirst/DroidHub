@@ -49,6 +49,7 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
         binding.buttonSignUp.setOnClickListener {
             binding.progressBar.visibility = View.VISIBLE
             binding.buttonSignUp.isEnabled = false
+            binding.textLogin.isEnabled = false
             signUpUser()
         }
 
@@ -63,6 +64,7 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
             binding.editName.requestFocus()
             binding.progressBar.visibility = View.INVISIBLE
             binding.buttonSignUp.isEnabled = true
+            binding.textLogin.isEnabled = true
             return
         } else {
             binding.nameLayout.error = null
@@ -74,6 +76,7 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
                 binding.editEmail.requestFocus()
                 binding.progressBar.visibility = View.INVISIBLE
                 binding.buttonSignUp.isEnabled = true
+                binding.textLogin.isEnabled = true
                 return
             }
             !Patterns.EMAIL_ADDRESS.matcher(binding.editEmail.text.toString()).matches() -> {
@@ -81,6 +84,7 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
                 binding.editEmail.requestFocus()
                 binding.progressBar.visibility = View.INVISIBLE
                 binding.buttonSignUp.isEnabled = true
+                binding.textLogin.isEnabled = true
                 return
             }
             else -> {
@@ -94,6 +98,7 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
                 binding.editPassword.requestFocus()
                 binding.progressBar.visibility = View.INVISIBLE
                 binding.buttonSignUp.isEnabled = true
+                binding.textLogin.isEnabled = true
                 return
             }
             binding.editPassword.text.toString().length < 6 -> {
@@ -101,6 +106,7 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
                 binding.editPassword.requestFocus()
                 binding.progressBar.visibility = View.INVISIBLE
                 binding.buttonSignUp.isEnabled = true
+                binding.textLogin.isEnabled = true
                 return
             }
             else -> {
@@ -125,14 +131,15 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
                                     if (it.isSuccessful) {
                                         binding.progressBar.visibility = View.INVISIBLE
                                         binding.buttonSignUp.isEnabled = true
+                                        binding.textLogin.isEnabled = true
                                         Toast.makeText(
                                                 requireContext(), "Registration Successful.",
                                                 Toast.LENGTH_LONG
                                         ).show()
 
                                         user.sendEmailVerification()
-                                                .addOnCompleteListener {
-                                                    if (it.isSuccessful) {
+                                                .addOnCompleteListener { task ->
+                                                    if (task.isSuccessful) {
                                                         Log.d(TAG, "Email sent.")
                                                         Toast.makeText(
                                                                 requireContext(), "Verification Email Sent.",
@@ -148,6 +155,7 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
                         // If sign in fails, display a message to the user.
                         binding.progressBar.visibility = View.INVISIBLE
                         binding.buttonSignUp.isEnabled = true
+                        binding.textLogin.isEnabled = true
                         if (task.exception is FirebaseAuthUserCollisionException) {
                             Toast.makeText(
                                     requireContext(),

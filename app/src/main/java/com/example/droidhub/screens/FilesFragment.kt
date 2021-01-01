@@ -20,6 +20,7 @@ class FilesFragment : Fragment(R.layout.fragment_files) {
     private lateinit var databaseReference: DatabaseReference
     private lateinit var fileList: ArrayList<File>
     private lateinit var fileKeys: ArrayList<String>
+    private lateinit var listener: ValueEventListener
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -42,6 +43,7 @@ class FilesFragment : Fragment(R.layout.fragment_files) {
                     "You've been signed out successfully.",
                     Toast.LENGTH_LONG
             ).show()
+            databaseReference.removeEventListener(listener)
             findNavController().navigate(R.id.action_filesFragment_to_loginFragment)
         }
 
@@ -52,7 +54,8 @@ class FilesFragment : Fragment(R.layout.fragment_files) {
 
         fileList = ArrayList()
         fileKeys = ArrayList()
-        databaseReference.addValueEventListener(object : ValueEventListener {
+
+        listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 fileList.clear()
                 if (snapshot.exists()) {
@@ -79,7 +82,8 @@ class FilesFragment : Fragment(R.layout.fragment_files) {
             }
 
             override fun onCancelled(error: DatabaseError) {}
-        })
+        }
+        databaseReference.addValueEventListener(listener)
 
         binding.fabAdd.setOnClickListener {
             findNavController().navigate(R.id.action_filesFragment_to_uploadFragment)
