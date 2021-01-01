@@ -25,11 +25,11 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         val currentUser = auth.currentUser
-        if (currentUser != null) {
+        if (currentUser != null && currentUser.isEmailVerified) {
             Toast.makeText(
-                requireContext(),
-                "Welcome back, ${currentUser.displayName}",
-                Toast.LENGTH_LONG
+                    requireContext(),
+                    "Welcome back, ${currentUser.displayName}",
+                    Toast.LENGTH_LONG
             ).show()
             findNavController().navigate(R.id.action_loginFragment_to_filesFragment)
         }
@@ -96,37 +96,49 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         }
 
         auth.signInWithEmailAndPassword(
-            binding.editEmail.text.toString(),
-            binding.editPassword.text.toString()
+                binding.editEmail.text.toString(),
+                binding.editPassword.text.toString()
         )
-            .addOnCompleteListener(requireActivity()) { task ->
-                if (task.isSuccessful) {
-                    // Sign in success, update UI with the signed-in user's information
-                    Log.d(TAG, "signInWithEmail:success")
-                    binding.progressBar.visibility = View.INVISIBLE
-                    binding.buttonLogin.isEnabled = true
-                    Toast.makeText(
-                        requireContext(), "Login Successful.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    findNavController().navigate(R.id.action_loginFragment_to_filesFragment)
-                } else {
-                    // If sign in fails, display a message to the user.
-                    if (task.exception is FirebaseAuthInvalidUserException) {
-                        Toast.makeText(
-                            requireContext(), "User does not exist.",
-                            Toast.LENGTH_LONG
-                        ).show()
+                .addOnCompleteListener(requireActivity()) { task ->
+                    if (task.isSuccessful) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(TAG, "signInWithEmail:success")
+                        binding.progressBar.visibility = View.INVISIBLE
+                        binding.buttonLogin.isEnabled = true
+
+                        val currentUser = auth.currentUser
+                        if (currentUser != null) {
+                            if (currentUser.isEmailVerified) {
+                                Toast.makeText(
+                                        requireContext(), "Login Successful.",
+                                        Toast.LENGTH_LONG
+                                ).show()
+                                findNavController().navigate(R.id.action_loginFragment_to_filesFragment)
+                            } else {
+                                Toast.makeText(
+                                        requireContext(), "Your email has not been verified. \nKindly check your inbox for the mail to verify your email",
+                                        Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+
                     } else {
-                        Log.w(TAG, "signInWithEmail:failure", task.exception)
-                        Toast.makeText(
-                            requireContext(), "Authentication failed.",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        // If sign in fails, display a message to the user.
+                        if (task.exception is FirebaseAuthInvalidUserException) {
+                            Toast.makeText(
+                                    requireContext(), "User does not exist.",
+                                    Toast.LENGTH_LONG
+                            ).show()
+                        } else {
+                            Log.w(TAG, "signInWithEmail:failure", task.exception)
+                            Toast.makeText(
+                                    requireContext(), "Authentication failed.",
+                                    Toast.LENGTH_LONG
+                            ).show()
+                        }
+                        binding.progressBar.visibility = View.INVISIBLE
+                        binding.buttonLogin.isEnabled = true
                     }
-                    binding.progressBar.visibility = View.INVISIBLE
-                    binding.buttonLogin.isEnabled = true
                 }
-            }
     }
 }

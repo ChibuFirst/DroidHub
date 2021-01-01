@@ -26,11 +26,11 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         val currentUser = auth.currentUser
-        if (currentUser != null) {
+        if (currentUser != null && currentUser.isEmailVerified) {
             Toast.makeText(
-                requireContext(),
-                "Welcome back, ${currentUser.displayName}",
-                Toast.LENGTH_LONG
+                    requireContext(),
+                    "Welcome back, ${currentUser.displayName}",
+                    Toast.LENGTH_LONG
             ).show()
             findNavController().navigate(R.id.action_signUpFragment_to_filesFragment)
         }
@@ -109,45 +109,60 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
         }
 
         auth.createUserWithEmailAndPassword(
-            binding.editEmail.text.toString(),
-            binding.editPassword.text.toString()
+                binding.editEmail.text.toString(),
+                binding.editPassword.text.toString()
         )
-            .addOnCompleteListener(requireActivity()) { task ->
-                if (task.isSuccessful) {
-                    // Sign in success, update UI with the signed-in user's information
-                    binding.progressBar.visibility = View.INVISIBLE
-                    binding.buttonSignUp.isEnabled = true
-                    Log.d(TAG, "createUserWithEmailAndPassword:success")
-                    val user = auth.currentUser
-                    val profileUpdates = UserProfileChangeRequest.Builder()
-                        .setDisplayName(binding.editName.text.toString())
-                        .build()
-                    user!!.updateProfile(profileUpdates)
+                .addOnCompleteListener(requireActivity()) { task ->
+                    if (task.isSuccessful) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(TAG, "createUserWithEmailAndPassword:success")
+                        val user = auth.currentUser
+                        val profileUpdates = UserProfileChangeRequest.Builder()
+                                .setDisplayName(binding.editName.text.toString())
+                                .build()
+                        user!!.updateProfile(profileUpdates)
+                                .addOnCompleteListener {
+                                    if (it.isSuccessful) {
+                                        binding.progressBar.visibility = View.INVISIBLE
+                                        binding.buttonSignUp.isEnabled = true
+                                        Toast.makeText(
+                                                requireContext(), "Registration Successful.",
+                                                Toast.LENGTH_LONG
+                                        ).show()
 
-                    Toast.makeText(
-                        requireContext(), "Registration Successful.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    findNavController().navigate(R.id.action_signUpFragment_to_filesFragment)
-                } else {
-                    // If sign in fails, display a message to the user.
-                    binding.progressBar.visibility = View.INVISIBLE
-                    binding.buttonSignUp.isEnabled = true
-                    if (task.exception is FirebaseAuthUserCollisionException) {
-                        Toast.makeText(
-                            requireContext(),
-                            "The email address is already in use by another account.",
-                            Toast.LENGTH_LONG
-                        ).show()
+                                        user.sendEmailVerification()
+                                                .addOnCompleteListener {
+                                                    if (it.isSuccessful) {
+                                                        Log.d(TAG, "Email sent.")
+                                                        Toast.makeText(
+                                                                requireContext(), "Verification Email Sent.",
+                                                                Toast.LENGTH_LONG
+                                                        ).show()
+
+                                                        findNavController().navigate(R.id.action_signUpFragment_to_loginFragment)
+                                                    }
+                                                }
+                                    }
+                                }
                     } else {
-                        Log.w(TAG, "createUserWithEmailAndPassword:failure", task.exception)
-                        Toast.makeText(
-                            requireContext(), "Authentication failed.",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        // If sign in fails, display a message to the user.
+                        binding.progressBar.visibility = View.INVISIBLE
+                        binding.buttonSignUp.isEnabled = true
+                        if (task.exception is FirebaseAuthUserCollisionException) {
+                            Toast.makeText(
+                                    requireContext(),
+                                    "The email address is already in use by another account.",
+                                    Toast.LENGTH_LONG
+                            ).show()
+                        } else {
+                            Log.w(TAG, "createUserWithEmailAndPassword:failure", task.exception)
+                            Toast.makeText(
+                                    requireContext(), "Authentication failed.",
+                                    Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
                 }
-            }
     }
 
 }
