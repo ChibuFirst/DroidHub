@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.droidhub.R
 import com.example.droidhub.databinding.FragmentLoginBinding
 import com.example.droidhub.util.InputsValidation
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 
@@ -135,6 +136,12 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                                 "Your email has not been verified. \nKindly check your inbox for the mail to verify your email",
                                 Toast.LENGTH_LONG
                             ).show()
+                            MaterialAlertDialogBuilder(requireContext())
+                                    .setMessage("Please kindly verify your email address to enable you sign into your account. " +
+                                            "\n\nTo verify your email, open the verification mail that was sent to the email " +
+                                            "address you provided and click on the link there. \n\nRegards.")
+                                    .create()
+                                    .show()
                         }
                     }
 
