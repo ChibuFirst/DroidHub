@@ -1,6 +1,7 @@
 package com.example.droidhub.adapter
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
@@ -19,13 +20,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.droidhub.R
 import com.example.droidhub.model.File
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
 class FileRecyclerAdapter(private val activity: FragmentActivity, private val fileList: ArrayList<File>, private val fileKeys: ArrayList<String>) :
         RecyclerView.Adapter<FileRecyclerAdapter.FileViewHolder>() {
 
-    private val STORAGE_REQUEST_CODE: Int = 1000
+    companion object {
+        private const val STORAGE_REQUEST_CODE: Int = 1000
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileViewHolder {
         return FileViewHolder(
@@ -46,7 +50,7 @@ class FileRecyclerAdapter(private val activity: FragmentActivity, private val fi
                 true
             }
             contextMenu.add(0, view.id, 0, "Delete").setOnMenuItemClickListener {
-                deleteSelectedFile(key)
+                deleteSelectedFile(file.fileName, key)
                 true
             }
             contextMenu.add(0, view.id, 0, "Download").setOnMenuItemClickListener {
@@ -54,10 +58,10 @@ class FileRecyclerAdapter(private val activity: FragmentActivity, private val fi
                     if (activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
                         activity.requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), STORAGE_REQUEST_CODE)
                     } else {
-                        downloadSelectedFile(file.fileUri)
+                        downloadSelectedFile(file.fileName, file.fileUri)
                     }
                 } else {
-                    downloadSelectedFile(file.fileUri)
+                    downloadSelectedFile(file.fileName, file.fileUri)
                 }
                 true
             }
@@ -77,33 +81,51 @@ class FileRecyclerAdapter(private val activity: FragmentActivity, private val fi
         activity.startActivity(shareIntent)
     }
 
-    private fun downloadSelectedFile(fileUri: String) {
-        val request = DownloadManager.Request(Uri.parse(fileUri)).apply {
-            setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
-            setTitle("Download")
-            setDescription("The file is downloading...")
-            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "${System.currentTimeMillis()}")
-        }
+    private fun downloadSelectedFile(name: String, fileUri: String) {
+        val dialogBuilder = MaterialAlertDialogBuilder(activity).apply {
+            setTitle("Download this file?")
+            setMessage("File name: $name")
+            setPositiveButton("Continue") { _, _ ->
+                val request = DownloadManager.Request(Uri.parse(fileUri)).apply {
+                    setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+                    setTitle("Download")
+                    setDescription("The file is downloading...")
+                    setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                    setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "${System.currentTimeMillis()}")
+                }
 
-        val manager = activity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        manager.enqueue(request)
-        Toast.makeText(activity, "Selected file downloading", Toast.LENGTH_SHORT).show()
+                val manager = activity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                manager.enqueue(request)
+                Toast.makeText(activity, "Selected file downloading", Toast.LENGTH_SHORT).show()
+            }
+            setNegativeButton("Cancel") { p0, _ -> p0!!.dismiss() }
+        }
+        dialogBuilder.create().show()
     }
 
-    private fun deleteSelectedFile(key: String) {
+    private fun deleteSelectedFile(name: String, key: String) {
         val auth = FirebaseAuth.getInstance()
         val databaseReference = FirebaseDatabase.getInstance().getReference("files").child(auth.currentUser!!.uid)
-        databaseReference.child(key).removeValue()
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Toast.makeText(activity, "Selected file deleted.", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(activity, "Unable to delete file", Toast.LENGTH_SHORT).show()
-                    }
-                }
+
+        val dialogBuilder = MaterialAlertDialogBuilder(activity).apply {
+            setTitle("Delete this file?")
+            setMessage("File name: $name \nThis is permanent and can't be undone")
+            setPositiveButton("Delete") { _, _ ->
+                databaseReference.child(key).removeValue()
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                Toast.makeText(activity, "Selected file deleted.", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(activity, "Unable to delete file", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+            }
+            setNegativeButton("Cancel") { p0, _ -> p0!!.dismiss() }
+        }
+        dialogBuilder.create().show()
     }
 
+    @SuppressLint("QueryPermissionsNeeded")
     private fun openSelectedFile(file: File) {
         val extension = MimeTypeMap.getFileExtensionFromUrl(file.fileUri)
         val intent = Intent().apply {
