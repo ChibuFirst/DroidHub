@@ -27,9 +27,9 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         val currentUser = auth.currentUser
         if (currentUser != null && currentUser.isEmailVerified) {
             Toast.makeText(
-                    requireContext(),
-                    "Welcome back, ${currentUser.displayName}",
-                    Toast.LENGTH_LONG
+                requireContext(),
+                "Welcome back, ${currentUser.displayName}",
+                Toast.LENGTH_LONG
             ).show()
             findNavController().navigate(R.id.action_loginFragment_to_filesFragment)
         }
@@ -43,9 +43,14 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
         binding.editEmail.addTextChangedListener(InputsValidation(binding.emailLayout))
         binding.editPassword.addTextChangedListener(InputsValidation(binding.passwordLayout))
+        binding.textForgotPassword.setOnClickListener {
+            findNavController().navigate(R.id.action_loginFragment_to_forgotPasswordFragment)
+        }
         binding.buttonLogin.setOnClickListener {
             binding.progressBar.visibility = View.VISIBLE
             binding.buttonLogin.isEnabled = false
+            binding.textForgotPassword.isEnabled = false
+            binding.textSignUp.isEnabled = false
             loginUser()
         }
 
@@ -61,6 +66,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 binding.editEmail.requestFocus()
                 binding.progressBar.visibility = View.INVISIBLE
                 binding.buttonLogin.isEnabled = true
+                binding.textForgotPassword.isEnabled = true
+                binding.textSignUp.isEnabled = true
                 return
             }
             !Patterns.EMAIL_ADDRESS.matcher(binding.editEmail.text.toString()).matches() -> {
@@ -68,6 +75,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 binding.editEmail.requestFocus()
                 binding.progressBar.visibility = View.INVISIBLE
                 binding.buttonLogin.isEnabled = true
+                binding.textForgotPassword.isEnabled = true
+                binding.textSignUp.isEnabled = true
                 return
             }
             else -> {
@@ -81,6 +90,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 binding.editPassword.requestFocus()
                 binding.progressBar.visibility = View.INVISIBLE
                 binding.buttonLogin.isEnabled = true
+                binding.textForgotPassword.isEnabled = true
+                binding.textSignUp.isEnabled = true
                 return
             }
             binding.editPassword.text.toString().length < 6 -> {
@@ -88,6 +99,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 binding.editPassword.requestFocus()
                 binding.progressBar.visibility = View.INVISIBLE
                 binding.buttonLogin.isEnabled = true
+                binding.textForgotPassword.isEnabled = true
+                binding.textSignUp.isEnabled = true
                 return
             }
             else -> {
@@ -96,49 +109,54 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         }
 
         auth.signInWithEmailAndPassword(
-                binding.editEmail.text.toString(),
-                binding.editPassword.text.toString()
+            binding.editEmail.text.toString(),
+            binding.editPassword.text.toString()
         )
-                .addOnCompleteListener(requireActivity()) { task ->
-                    if (task.isSuccessful) {
-                        // Sign in success, update UI with the signed-in user's information
-                        Log.d(TAG, "signInWithEmail:success")
-                        binding.progressBar.visibility = View.INVISIBLE
-                        binding.buttonLogin.isEnabled = true
+            .addOnCompleteListener(requireActivity()) { task ->
+                if (task.isSuccessful) {
+                    // Sign in success, update UI with the signed-in user's information
+                    Log.d(TAG, "signInWithEmail:success")
+                    binding.progressBar.visibility = View.INVISIBLE
+                    binding.buttonLogin.isEnabled = true
+                    binding.textForgotPassword.isEnabled = true
+                    binding.textSignUp.isEnabled = true
 
-                        val currentUser = auth.currentUser
-                        if (currentUser != null) {
-                            if (currentUser.isEmailVerified) {
-                                Toast.makeText(
-                                        requireContext(), "Login Successful.",
-                                        Toast.LENGTH_LONG
-                                ).show()
-                                findNavController().navigate(R.id.action_loginFragment_to_filesFragment)
-                            } else {
-                                Toast.makeText(
-                                        requireContext(), "Your email has not been verified. \nKindly check your inbox for the mail to verify your email",
-                                        Toast.LENGTH_LONG
-                                ).show()
-                            }
-                        }
-
-                    } else {
-                        // If sign in fails, display a message to the user.
-                        if (task.exception is FirebaseAuthInvalidUserException) {
+                    val currentUser = auth.currentUser
+                    if (currentUser != null) {
+                        if (currentUser.isEmailVerified) {
                             Toast.makeText(
-                                    requireContext(), "User does not exist.",
-                                    Toast.LENGTH_LONG
+                                requireContext(), "Login Successful.",
+                                Toast.LENGTH_LONG
                             ).show()
+                            findNavController().navigate(R.id.action_loginFragment_to_filesFragment)
                         } else {
-                            Log.w(TAG, "signInWithEmail:failure", task.exception)
                             Toast.makeText(
-                                    requireContext(), "Authentication failed.",
-                                    Toast.LENGTH_LONG
+                                requireContext(),
+                                "Your email has not been verified. \nKindly check your inbox for the mail to verify your email",
+                                Toast.LENGTH_LONG
                             ).show()
                         }
-                        binding.progressBar.visibility = View.INVISIBLE
-                        binding.buttonLogin.isEnabled = true
                     }
+
+                } else {
+                    // If sign in fails, display a message to the user.
+                    if (task.exception is FirebaseAuthInvalidUserException) {
+                        Toast.makeText(
+                            requireContext(), "User does not exist.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } else {
+                        Log.w(TAG, "signInWithEmail:failure", task.exception)
+                        Toast.makeText(
+                            requireContext(), "Authentication failed.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    binding.progressBar.visibility = View.INVISIBLE
+                    binding.buttonLogin.isEnabled = true
+                    binding.textForgotPassword.isEnabled = true
+                    binding.textSignUp.isEnabled = true
                 }
+            }
     }
 }

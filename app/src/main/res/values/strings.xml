@@ -19,4 +19,7 @@
     <string name="password_length_error">Password should be at least 6 characters.</string>
     <string name="sign_out">Sign out</string>
     <string name="no_files_uploaded_yet">No files uploaded yet.</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="reset_info">Kindly enter your email address to receive a password reset link.</string>
 </resources>
